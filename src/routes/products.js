@@ -3,12 +3,16 @@ const router = express.Router();
 const Product = require('../models/Product');
 const cloudinary = require('cloudinary').v2;
 
+const streamifier = require('streamifier');
 
-cloudinary.config({
-  cloud_name: 'dujj3kz6x',
-  api_key: '711327931848858',
-  api_secret: '2m7NNzoTWz0im-xxLMaprBKbiu8'
-});
+const bodyParser = require('body-parser');
+
+const multer = require('multer');
+const upload = multer();
+
+router.use(bodyParser.urlencoded({ extended: true }));
+
+
 
 router.get('/', async (req, res) => {
   try {
@@ -19,30 +23,31 @@ router.get('/', async (req, res) => {
   }
 });
 
+
+
+//test
 // Ruta para agregar un nuevo producto
 router.post('/add', async (req, res) => {
   try {
-    const { name, description, price, stock , image} = req.body;
+    const { name, description, price, stock, image } = req.body; // Cambio aquí
 
-    let imageUrl = "";
-    if (image) {
-      const result = await cloudinary.uploader.upload(image, { folder: 'products' });
-      imageUrl = result.secure_url;
-    }
     const newProduct = new Product({
       name,
       description,
       price,
       stock,
-      image: imageUrl
+      image // Usamos la URL de la imagen
     });
     await newProduct.save();
-
-    res.status(201).json({ message: 'Product added successfully' });
+    
+    res.status(201).json({ message: 'Product added successfully',newProduct });
   } catch (error) {
+    console.log('Error en el servidor:', error);
     res.status(500).json({ message: 'An error occurred', error: error.message });
   }
 });
+
+
 
 // Ruta para eliminar un producto por su ID
 router.delete('/:productId', async (req, res) => {
